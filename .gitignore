@@ -1,0 +1,61 @@
+# Compiled source files
+*.o
+*.lo
+*.la
+*.al
+*.libs
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.class
+
+# Compiled binary files
+*.out
+*.cgi
+
+# Libraries
+*.a
+*.lib 
+
+# Generated files
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+config.h
+config.h.in
+config.log
+config.status
+configure
+configure.scan
+depcomp
+install-sh
+missing
+stamp-h1
+ltmain.sh
+libtool
+
+# Autotools directories
+m4/
+*.m4
+
+# Debug files
+*.gdb
+*.core
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

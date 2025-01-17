@@ -30,9 +30,22 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "user.h"
 #include "cloghtml.h"
 #include "clogdb.h"
+
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
 
 int main () {
 	int maxarchive = 1000; /* TODO: drop this number when search function is created */
@@ -87,9 +100,9 @@ int main () {
 	}
 
 	htmlStaticPrint("contenttablestart");
-	
+	printf("<P>There are %li stories in the database\n\r",numrows);
 	while((newsrow = mysql_fetch_row(newsresult)) != 0) {
-		/* timedateformat(newsrow[5], stimedate); */
+		// timedateformat(newsrow[5], stimedate); 
 
 
 		sprintf(sqlBuffer,"SELECT * FROM comments WHERE nid = \'%s\' AND lid = \'2\'",newsrow[0]);
@@ -107,7 +120,7 @@ int main () {
 			htmlStaticPrint("footer");
 			exit(EXIT_FAILURE);
 		}
-		sprintf(sqlBuffer,"SELECT realname FROM users WHERE username = \'%s\'",newsrow[4]);
+		sprintf(sqlBuffer,"SELECT realname FROM users WHERE username = \'%s\'",newsrow[3]);
 		if(cLogQueryUserDB() != 0) {
 			printf("<P>Critical Error: user lookup failure");
 			htmlStaticPrint("contenttableend");
@@ -122,18 +135,18 @@ int main () {
 		printf("<br /><h3><a href=\"news.cgi?nid=%s\">%s</a></h3>\n\r",newsrow[0],newsrow[1]);
 		printf("<h2>Posted by %s ",userrow[0]);
 		if(allcommentcount == 1) {
-			printf("at %s with %li comment</h2>\n\r",newsrow[5],allcommentcount);
+			printf("at %s with %li comment</h2>\n\r",newsrow[4],allcommentcount);
 		} else {
-			printf("at %s with %li comments</h2>\n\r",newsrow[5],allcommentcount);
+			printf("at %s with %li comments</h2>\n\r",newsrow[4],allcommentcount);
 		}		
 	}
+	
 
-	if(newsresult) mysql_free_result(newsresult);
-	if(userresult) mysql_free_result(userresult);
-	if(commentresult) mysql_free_result(commentresult);
+	if(newsresult != NULL) mysql_free_result(newsresult);
+	//if(userresult != NULL) mysql_free_result(userresult);
+	if(commentresult != NULL) mysql_free_result(commentresult);
 
 	htmlStaticPrint("contenttableend");
 	htmlStaticPrint("footer");
-	
 	return 0;
 }

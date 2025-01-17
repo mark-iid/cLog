@@ -72,15 +72,17 @@ void shownews(char *principalName, char *principalGroups, char *nid) {
 			}
 	} else {
 		sprintf(sqlBuffer,"SELECT * FROM newsitems WHERE nid = \'%s\' AND status != \'deleted\'",nid);
-		if(cLogQueryNewsDB() != 0) {
+		int result = -1;
+		result = cLogQueryNewsDB();
+		if(result != 0) {
 			printf("<P>Critical Error: News item lookup failure");
 			htmlStaticPrint("footer");
-			exit(EXIT_FAILURE);
+			exit(0);
 		}
 		if(mysql_num_rows(newsresult) == 0) {
 			printf("<p>Invalid news ID");
 			htmlStaticPrint("footer");
-			exit(EXIT_FAILURE);
+			exit(0);
 		}
 	}
 	
@@ -90,11 +92,11 @@ void shownews(char *principalName, char *principalGroups, char *nid) {
 	
 	/* repeat for each row returned from the news lookup */
 	while((row = mysql_fetch_row(newsresult))) {
-		timedateformat(row[5], stimedate);
+		timedateformat(row[4], stimedate);
 
 		/* lookup user name of news item author */
 		sprintf(sqlBuffer,"SELECT * FROM users WHERE username = \'%s\'",
-		row[4]);
+		row[3]);
 		if(cLogQueryUserDB() != 0) {
 			printf("<P>Critical Error: user lookup failure");
 			htmlStaticPrint("footer");
@@ -104,7 +106,7 @@ void shownews(char *principalName, char *principalGroups, char *nid) {
 
 		
 		/* lookup topic info */
-		sprintf(sqlBuffer, "SELECT * FROM topics WHERE tid = \"%s\"", row[7]);
+		sprintf(sqlBuffer, "SELECT * FROM topics WHERE tid = \"%s\"", row[6]);
 		if(cLogQueryTopicDB() != 0) {
 			printf("<P>Critical Error: Topic lookup failure");
 			htmlStaticPrint("footer");
@@ -128,21 +130,15 @@ void shownews(char *principalName, char *principalGroups, char *nid) {
 				printf("<a href=\"user.cgi?user=%s\">%s</a>",userrow[0],userrow[2]);
 			} else if(strstr(HtmlTemplate->data, "[% timedate %]")) {
 				/* printf("%s",stimedate); */
-				printf("%s",row[5]);
+				printf("%s",row[4]);
 			} else if(strstr(HtmlTemplate->data, "[% intro %]")) {
 				printconv(row[2]);
 			} else if(strstr(HtmlTemplate->data, "[% topic %]")) {
 				printf("<a href=\"topic.cgi?topic=%s\"><img src=\"%simages/topics/%s.gif\" border=\"0\" alt=\"%s\" title=\"%s\" /></a>",
-					row[7], var_site_templates, row[7], topicrow[1], topicrow[1]);
+					row[6], var_site_templates, row[6], topicrow[1], topicrow[1]);
 			} else if(strstr(HtmlTemplate->data, "[% edit %]")) {
-				if((strcmp(principalName, row[4]) == 0) || strstr(principalGroups,"admin") != 0)
+				if((strcmp(principalName, row[3]) == 0) || strstr(principalGroups,"admin") != 0)
 					printf(" <a href=\"editnews.cgi?nid=%i\">[EDIT]</a>",atoi(row[0]));
-			} else if(strstr(HtmlTemplate->data, "[% body %]")) {
-				if(nnid != 0) {
-					if(strcmp(row[3],"(null)") != 0) { /* don't print if (null) */
-						printconv(row[3]); /* print string and strip some html */
-					}
-				}
 			} else if(strstr(HtmlTemplate->data, "[% permalink %]")) {
 				if(nnid == 0) {
 					printf("(<a HREF=\"news.cgi?nid=%i\">PermaLink</a>)",atoi(row[0]));

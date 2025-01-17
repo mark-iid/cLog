@@ -63,7 +63,7 @@ Envar *parseEnVar(char *env, int *n)
         }
 
         /* Clean up crumbs! */
-        free(cookiestr);
+        if(cookiestr != NULL) free(cookiestr);
         *n = nc;
         return c;
 }

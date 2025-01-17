@@ -30,9 +30,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "cloghtml.h"
+#include "clogdb.h"
 #include "envar.h"
 #include "user.h"
 #include "sitevars.h"
+#include "shownews.h"
+#include "showcomments.h"
+
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
 
 int main () {
 	int returncode = 0;
@@ -82,8 +97,8 @@ int main () {
 	}
 
 	for (i = 0; i < numQueryString; i++) {
-		free(query[i].key);
-		free(query[i].val);
+		if(query[i].key != NULL) free(query[i].key);
+		if(query[i].val != NULL) free(query[i].val);
 	}
 
 	htmlHeader((char*)cLogGetNewsTitle(atoi(nid)));
@@ -94,7 +109,7 @@ int main () {
 	showcomments(principalName, principalGroups, atoi(nid), 0);
 	htmlStaticPrint("contenttableend");
 	
-	free(nid);
+	if(nid != NULL) free(nid);
 	htmlStaticPrint("footer");
 	return 0;
 }

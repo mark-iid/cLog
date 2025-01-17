@@ -26,6 +26,15 @@
 #include <stdio.h>
 #include <string.h>
 #include "clogdb.h"
+#include "cloghtml.h"
+#include "sitevars.h"
+
+MYSQL cLogDB;
+char sqlBuffer[65000]; 
+MYSQL_RES *newsresult = NULL;
+MYSQL_RES *userresult = NULL;
+MYSQL_RES *commentresult = NULL;
+MYSQL_RES *topicresult = NULL;
 
 void reverse(char s[]);
 int getDBLogin(char host[], char name[], char user[], char pwd[]);
@@ -51,6 +60,7 @@ int cLogGetSiteVars();
 		printf("<html><head><title>Critical Error</title><head>");
 		printf("<body><p>Critical Error: Global Variable Init Failure");
 		printf("</body></html>");
+		exit(EXIT_FAILURE);
 	 }
  }
 
@@ -59,19 +69,36 @@ int cLogGetSiteVars();
  * returns 0 if successful, 1 if connect failed
  */
 int cLogConnectDB() {
-	/* the next four vars allow for a potential buffer overflow, 
-	 * I'm ok with this for now since I doubt anyone is going to pick 
-	 * a url, database name, username, or password over 256 chars 
-	 * */
-	char dbhost[256];
-	char dbname[256];
-	char dbpwd[256]; 
-	char dbuser[256];
-	if(getDBLogin(dbhost, dbname, dbuser, dbpwd) != 0) return 1;
-	if(mysql_init(&cLogDB) == NULL) return 2;
-	if(mysql_real_connect(&cLogDB,dbhost,dbuser,
-		dbpwd,dbname,0,NULL,0) == NULL) return 3;
-	return 0;
+    char dbhost[256];
+    char dbname[256];
+    char dbpwd[256]; 
+    char dbuser[256];
+
+    // Get database login details
+    if (getDBLogin(dbhost, dbname, dbuser, dbpwd) != 0) {
+        fprintf(stderr, "Error: Unable to get database login details.\n");
+        return 1;
+    }
+
+    // Initialize MySQL connection
+    if (mysql_init(&cLogDB) == NULL) {
+        fprintf(stderr, "Error: mysql_init() failed.\n");
+        return 2;
+    }
+
+    // Connect to the database
+    if (mysql_real_connect(&cLogDB, dbhost, dbuser, dbpwd, dbname, 0, NULL, 0) == NULL) {
+        fprintf(stderr, "Error: mysql_real_connect() failed.\n");
+        fprintf(stderr, "MySQL error: %s\n", mysql_error(&cLogDB));
+        mysql_close(&cLogDB);
+        return 3;
+    }
+
+    return 0;
+}
+
+void cLogCloseDB() {
+    mysql_close(&cLogDB);
 }
 
 /** cLogQueryUserDB()
@@ -79,11 +106,13 @@ int cLogConnectDB() {
  * returns 0 if successful, 1 if query failed
  */
 int cLogQueryUserDB() {
-	int err;
-	
-	err = mysql_real_query(&cLogDB,sqlBuffer,(unsigned)(int)strlen(sqlBuffer));
-	if(err != 0) return err;
+	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
 	userresult = mysql_store_result(&cLogDB);
+	if (mysql_errno(&cLogDB) != 0) {
+		fprintf(stderr, "Error: cLogQueryUserDB.mysql_store_result() failed.\n");
+		fprintf(stderr, "MySQL error: %s\n", mysql_error(&cLogDB));
+		return 1;
+	}
 	return 0;
 }
 
@@ -92,11 +121,13 @@ int cLogQueryUserDB() {
  * returns 0 if successful, 1 if query failed
  */
 int cLogQueryNewsDB() {
-	int err;
-	
-	err = mysql_real_query(&cLogDB,sqlBuffer,(unsigned)(int)strlen(sqlBuffer));
-	if(err != 0) return err;
+	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
 	newsresult = mysql_store_result(&cLogDB);
+	if (mysql_errno(&cLogDB) != 0) {
+		fprintf(stderr, "Error: cLogQueryNewsDB.mysql_store_result() failed.\n");
+		fprintf(stderr, "MySQL error: %s\n", mysql_error(&cLogDB));
+		return 1;
+	}
 	return 0;
 }
 
@@ -105,10 +136,13 @@ int cLogQueryNewsDB() {
  * returns 0 if successful, 1 if query failed
  */
 int cLogQueryCommentDB() {
-	int err;
-	err = mysql_real_query(&cLogDB,sqlBuffer,(unsigned)(int)strlen(sqlBuffer));
-	if(err != 0) return err;
+	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
 	commentresult = mysql_store_result(&cLogDB);
+	if (mysql_errno(&cLogDB) != 0) {
+		fprintf(stderr, "Error: cLogQueryCommentDB.mysql_store_result() failed.\n");
+		fprintf(stderr, "MySQL error: %s\n", mysql_error(&cLogDB));
+		return 1;
+	}
 	return 0;
 }
 
@@ -117,10 +151,13 @@ int cLogQueryCommentDB() {
  * returns 0 if successful, 1 if query failed
  */
 int cLogQueryTopicDB() {
-	int err;
-	err = mysql_real_query(&cLogDB,sqlBuffer,(unsigned)(int)strlen(sqlBuffer));
-	if(err != 0) return err;
+	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
 	topicresult = mysql_store_result(&cLogDB);
+	if (mysql_errno(&cLogDB) != 0) {
+		fprintf(stderr, "Error: cLogQueryTopicDB.mysql_store_result() failed.\n");
+		fprintf(stderr, "MySQL error: %s\n", mysql_error(&cLogDB));
+		return 1;
+	}
 	return 0;
 }
 
@@ -196,48 +233,42 @@ char *cLogGetNewsTitle(int nid) {
  * variable CLOGDB and returns this value (the db password)
  */
 int getDBLogin(char host[], char name[], char user[], char pwd[]) {
-	FILE *file = NULL;
-	int i = 0;
-	file = fopen("clog.cgi", "r");
-	if(file == (FILE *)0) {
-		return 1;
-	}
-	
-	/* get dbhost */
-	for(i = 0;i < 255;i++) {
-		host[i] = getc(file);
-		if(host[i] == '\r' || host[i] == '\n') {
-			host[i] = '\0';
-			break;
-		}
-	}
-	/* get dbname */
-	for(i = 0;i < 255;i++) {
-		name[i] = getc(file);
-		if(name[i] == '\r' || name[i] == '\n') {
-			name[i] = '\0';
-			break;
-		}
-	}
-	/* get db username */
-	for(i = 0;i < 255;i++) {
-		user[i] = getc(file);
-		if(user[i] == '\r' || user[i] == '\n') {
-			user[i] = '\0';
-			break;
-			}
-	}
-	/* get db password */
-	for(i = 0;i < 255;i++) {
-		pwd[i] = getc(file);
-		if(pwd[i] == '\r' || pwd[i] == '\n') {
-			pwd[i] = '\0';
-			break;
-			}
-	}
+    FILE *file = fopen("clog.cgi", "r");
+    if (file == NULL) {
+        fprintf(stderr, "Error: Unable to open clog.cgi for reading.\n");
+        return 1;
+    }
 
-	fclose(file);
-	return 0;
+    // Read dbhost
+    if (fgets(host, 256, file) == NULL) {
+        fclose(file);
+        return 1;
+    }
+    host[strcspn(host, "\r\n")] = '\0'; // Remove newline character
+
+    // Read dbname
+    if (fgets(name, 256, file) == NULL) {
+        fclose(file);
+        return 1;
+    }
+    name[strcspn(name, "\r\n")] = '\0'; // Remove newline character
+
+    // Read dbuser
+    if (fgets(user, 256, file) == NULL) {
+        fclose(file);
+        return 1;
+    }
+    user[strcspn(user, "\r\n")] = '\0'; // Remove newline character
+
+    // Read dbpwd
+    if (fgets(pwd, 256, file) == NULL) {
+        fclose(file);
+        return 1;
+    }
+    pwd[strcspn(pwd, "\r\n")] = '\0'; // Remove newline character
+
+    fclose(file);
+    return 0;
 }
 	
 /** itoa
@@ -246,13 +277,16 @@ int getDBLogin(char host[], char name[], char user[], char pwd[]) {
 */
 void itoa(int n, char s[]) {
 	int i, sign;
-	
+	unsigned int num;
+
 	if((sign = n) < 0)
-		n = -n;
+		num = -n;
+	else
+		num = n;
 	i = 0;
 	do {
-		s[i++] = n % 10 + '0';
-	} while ((n /= 10) > 0);
+		s[i++] = num % 10 + '0';
+	} while ((num /= 10) > 0);
 	if (sign < 0)
 		s[i++] = '-';
 	s[i] = '\0';
@@ -272,26 +306,24 @@ void reverse(char s[]) {
 		s[j] = c;
 	}
 }
-
 /** escConv
  * converts a string with single and double quotes into a
  *	string with escape characters instead
  */
 void escConv(char *from, char *to) {
-	int fc = 0;
-	int tc = 0;
-	for(fc = 0; fc < (int) strlen(from); fc++) {
-		if(from[fc] == 34) { /* " */
-			to[tc++] = '\\';
-			to[tc++] = '\"';
-		} else if(from[fc] == 39) { /* ' */
-			to[tc++] = '\\';
-			to[tc++] = '\'';
+	while (*from) {
+		if (*from == '\"') { /* " */
+			*to++ = '\\';
+			*to++ = '\"';
+		} else if (*from == '\'') { /* ' */
+			*to++ = '\\';
+			*to++ = '\'';
 		} else {
-			to[tc++] = from[fc];
+			*to++ = *from;
 		}
+		from++;
 	}
-	to[tc] = '\0';
+	*to = '\0';
 }
 
 /** timedateformat

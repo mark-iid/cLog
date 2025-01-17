@@ -86,7 +86,7 @@ void htmlHeader(char *title) {
 	
 	
 	file = fopen(templatefile, "r");
-	free(templatefile);	
+	if(templatefile != NULL) free(templatefile);	
 	if(file == (FILE *)0) {
 		printf("Critical File Open error: header template");
 		return;
@@ -100,7 +100,7 @@ void htmlHeader(char *title) {
 		}
 		else if(strstr(buffer,"[% title %]")) printf("%s::%s",var_site_name, title);
 		else if(strstr(buffer,"[% css %]")) htmlStaticPrint("ssi/css");
-		else printf(buffer);
+		else printf("%s",buffer);
 	} while(x == 0);
 	fclose(file);
 	htmlStaticPrint("logo");
@@ -140,7 +140,7 @@ void htmlReadTemplate(char *htmltemplate, TEMPLATELIST **HtmlTemplate) {
 	sprintf(filename,"%s%s%s%s",var_site_location,var_site_templates,htmltemplate,ext);
 	
 	file = fopen(filename, "r");
-	free(filename);
+	if(filename != NULL) free(filename);
 	if(file == (FILE *)0) {
 		printf("Critical File Open error: %s",filename);
 		return;
@@ -184,10 +184,10 @@ void htmlStaticPrint(char *htmltemplate) {
 	file = fopen(filename, "r");
 	if(file == (FILE *)0) {
 		printf("Critical File Open error: %s",filename);
-		free(filename);  
+		if(filename != NULL) free(filename);  
 		return;
 	}
-	free(filename);  
+	if(filename != NULL) free(filename);  
 	do {
 		x = htmlGetLine(file, buffer);
 		if(x > 1) { 
@@ -195,7 +195,7 @@ void htmlStaticPrint(char *htmltemplate) {
 			fclose(file);
 			return;
 		}
-		printf(buffer);
+		printf("%s",buffer);
 	} while(x == 0);
 	fclose(file);
 }
@@ -252,7 +252,7 @@ void htmlMainBox(char *principalName, char *principalGroups) {
 			if(strstr(principalGroups,"newspost"))
 				printf("<li><a href=\"newspost.cgi\">Post News</a></li>");
 		} else 
-			printf(buffer);
+			printf("%s",buffer);
 	} while(x == 0);
 	fclose(file);
 }

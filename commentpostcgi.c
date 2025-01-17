@@ -36,6 +36,19 @@
 #include "shownews.h"
 #include "showcomments.h"
 
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
+struct field_rec *urldec;
+
 int main () {
 	int returncode = 0;
 	MYSQL_ROW commentrow;
@@ -120,11 +133,11 @@ int main () {
 			printf("<input type=\"HIDDEN\" name=\"lid\" value=\"2\">");
 		} else {
 			printf("<P><input type=\"radio\" name=\"lid\" value=\"1\" CHECKED>Public Comment<BR>");
-			printf("<P><input type=\"radio\" name=\"lid\" value=\"2\">PSU ET Internal Comment<BR></P>");
+			printf("<P><input type=\"radio\" name=\"lid\" value=\"2\">Internal Comment<BR></P>");
 		}
 	} else if(strstr(principalGroups,"l2post")) {
 		printf("<P><input type=\"radio\" name=\"lid\" value=\"1\" CHECKED>Public Comment<BR>");
-		printf("<P><input type=\"radio\" name=\"lid\" value=\"2\">PSU ET Internal Comment<BR></P>");
+		printf("<P><input type=\"radio\" name=\"lid\" value=\"2\">Internal Comment<BR></P>");
 	} else {
 		printf("<input type=\"HIDDEN\" name=\"lid\" value=\"1\">");
 	}

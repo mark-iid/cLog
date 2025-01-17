@@ -60,8 +60,8 @@ int cLogGetUsername(char *username) {
 	}
 
 	for (i = 0; i < num_cookies; i++) {
-		free(cookies[i].key);
-		free(cookies[i].val);
+		if(cookies[i].key != NULL) free(cookies[i].key);
+		if(cookies[i].val != NULL) free(cookies[i].val);
 	}
 	
 	if(sessioncookie == NULL) {
@@ -72,11 +72,11 @@ int cLogGetUsername(char *username) {
 		sessioncookie);
 
 	if(cLogQueryUserDB() != 0) {
-		free(sessioncookie);
+		if(sessioncookie != NULL) free(sessioncookie);
 		return 30; /* Database lookup failure */
 	}
 
-	free(sessioncookie);
+	if(sessioncookie != NULL) free(sessioncookie);
 	nrows = (long) mysql_num_rows(userresult);
 	if(nrows == 0)
 	{

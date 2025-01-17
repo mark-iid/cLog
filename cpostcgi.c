@@ -31,6 +31,19 @@
 #include "user.h"
 #include "urldec.h"
 
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
+struct field_rec *urldec;
+
 int main () {
 	int returncode = 0;
 	int i; /* generic counter */
@@ -80,7 +93,7 @@ int main () {
 	if(strstr(principalGroups,"registered") == 0) {
 		printf("<p>You are not authorized to post comments");
 		htmlStaticPrint("footer");
-		free(str);
+		if(str != NULL) free(str);
 		exit(EXIT_FAILURE);
 	}
 
@@ -89,7 +102,7 @@ int main () {
 	if(cLogQueryUserDB() != 0) {
 		printf("<P>Critical Error: comment lookup failure 1");
 		htmlStaticPrint("footer");
-		free(str);
+		if(str != NULL) free(str);
 		exit(EXIT_FAILURE);
 	}
 	row = mysql_fetch_row(userresult);
@@ -117,7 +130,7 @@ int main () {
 			p=p->next;
 	}
 
-	free(str);
+	if(str != NULL) free(str);
 	
 	/* print comment as it will appear */
     htmlReadTemplate("commenttablemain", &HtmlTemplate);
@@ -128,7 +141,7 @@ int main () {
 		} else if(strstr(HtmlTemplate->data, "[% l2 %]")) {
 			if(!strcmp(lid,"2")) printf(" (L2)");
 		} else if(strstr(HtmlTemplate->data, "[% author %]")) {
-			printf(principalName);
+			printf("%s",principalName);
 		} else if(strstr(HtmlTemplate->data, "[% timestamp %]")) {
 			printf("[TIMESTAMP]");
 		/*} else if(strstr(HtmlTemplate->data, "[% permalink %]")) {
@@ -178,14 +191,18 @@ int main () {
 		escConv(titleStr, titleStrEsc);
 		escConv(commentStr, commentStrEsc);
 		
-		sprintf(sqlBuffer,"INSERT INTO comments (nid, pid, authorid, lid, comment, title) VALUES (\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\')",
+		sprintf(sqlBuffer,"INSERT INTO comments (nid, pid, authorid, lid, comment, title, timestamp) VALUES (\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',sysdate())",
 			nid, pid, row[0], lid, commentStrEsc, titleStrEsc);
-	
+		fprintf(stderr, "SQL: %s\n", sqlBuffer);
+		mysql_free_result(userresult);
 		err = cLogQueryCommentDB();
 		if(err == 0) {
 			printf("<p>Comment posted - <a href=\"/\">Return Home</a>");		
 		}
-		if (err != 0) htmlDBError(principalName, err);
+		if (err != 0) {
+			printf("<p>Comment post failed");
+			htmlDBError(principalName, err);
+		}
 		if(titleStrEsc != NULL) free(titleStrEsc);
 		if(titleStrEsc != NULL) free(commentStrEsc);
 	}		

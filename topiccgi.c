@@ -32,6 +32,18 @@
 #include "envar.h"
 #include "clogdb.h"
 
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
+
 void topiclist();
 
 int main () {
@@ -77,8 +89,8 @@ int main () {
 	}
 
 	for (i = 0; i < numQueryString; i++) {
-		free(query[i].key);
-		free(query[i].val);
+		if(query[i].key != NULL) free(query[i].key);
+		if(query[i].val != NULL) free(query[i].val);
 	}
 	
 	if(strcmp(topic,"topiclist") ==0) {
@@ -119,7 +131,7 @@ int main () {
 		printf("<p>There are no news items posted under this topic.</p>");
 	} else {	
 		while((row = mysql_fetch_row(newsresult)) != 0) {
-			timedateformat(row[5], stimedate);
+			timedateformat(row[4], stimedate);
 
 			sprintf(sqlBuffer,"SELECT * FROM comments WHERE nid = \'%s\' AND lid = \'2\'",row[0]);
 			if(cLogQueryCommentDB() != 0) {
@@ -134,7 +146,7 @@ int main () {
 				htmlStaticPrint("footer");
 				exit(EXIT_FAILURE);
 			}
-			sprintf(sqlBuffer,"SELECT realname FROM users WHERE username = \'%s\'",row[4]);
+			sprintf(sqlBuffer,"SELECT realname FROM users WHERE username = \'%s\'",row[3]);
 			if(cLogQueryUserDB() != 0) {
 				printf("<p>Critical Error: user lookup failure");
 				htmlStaticPrint("footer");
@@ -148,9 +160,9 @@ int main () {
 		 printf("<br /><h3><a href=\"news.cgi?nid=%s\">%s</a></h3>\n\r",row[0],row[1]);
 			printf("<h2>Posted by %s ",userrow[0]);
 			if(allcommentcount == 1) {
-				printf("at %s with %li comment</h2></p>\n\r",row[5],allcommentcount);
+				printf("at %s with %li comment</h2></p>\n\r",row[4],allcommentcount);
 			} else {
-				printf("at %s with %li comments</h2></p>\n\r",row[5],allcommentcount);
+				printf("at %s with %li comments</h2></p>\n\r",row[4],allcommentcount);
 			}
 		}
 	}
@@ -188,15 +200,14 @@ void topiclist() {
 	printf("<table><tr>");
 	for(i = 0; i < numtopics; i++) {
 		topicrow = mysql_fetch_row(topicresult);
-		if (i % 4 == 0) printf("</tr><tr>");
+		if (i % 4 == 0) printf("</tr><tr><td><br><br></td></tr><tr>");
 		/* sqlBuffer is being reused as a file path buffer here. This is bad of me but I did not
 		   Want to create another variable just for this. So sue me
 		*/
 		sprintf(sqlBuffer, "%simages/topics/%s.gif", var_site_templates, topicrow[0]);
-		if (!access(sqlBuffer, F_OK))
-			printf("<td><a href=\"topic.cgi?topic=%s\"><img src=\"%simages/topics/%s.gif\" BORDER=\"0\" ALT=\"%s\" TITLE=\"%s\"></a></td>",
-			topicrow[0], var_site_templates, topicrow[0], topicrow[1], topicrow[1]);
-		printf("<td><a href=\"topic.cgi?topic=%s\">%s</a></td>",topicrow[0],topicrow[2]);
+		printf("<td><a href=\"topic.cgi?topic=%s\"><img src=\"%simages/topics/%s.gif\" BORDER=\"0\" ALT=\"%s\" TITLE=\"%s\"></a>",
+		topicrow[0], var_site_templates, topicrow[0], topicrow[2], topicrow[1]);
+		printf("<br><a href=\"topic.cgi?topic=%s\">%s</a></td>",topicrow[0],topicrow[1]);
 		printf("<td>&nbsp&nbsp&nbsp&nbsp</td>");
 	}
 	printf("</tr></table>");

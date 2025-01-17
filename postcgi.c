@@ -35,7 +35,21 @@
 #include "envar.h"
 #include "user.h"
 #include "urldec.h"
+#include "sitevars.h"
 
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
+
+struct field_rec *urldec;
 
 int main () {
 	int returncode = 0;
@@ -60,11 +74,11 @@ int main () {
 	char *selected = NULL;
 	TEMPLATELIST *HtmlTemplate = NULL;
 	char *htmlTemplateStart = NULL;
-	/* FILE *fp; */
+	FILE *fp;
 
 	cLogInitDB();
 	
-	/* fp = freopen("/tmp/post.log", "a+", stderr); */
+	fp = freopen("/tmp/post.log", "a+", stderr); 
 	
 	contentlength = atoi((getenv("CONTENT_LENGTH")));
 
@@ -134,7 +148,7 @@ int main () {
 		exit(EXIT_FAILURE);
 	}
 	topicrow = mysql_fetch_row(topicresult);
-	/* fprintf(stderr, "cLog: post.cgi - read in template, preparing to loop\n"); */
+	fprintf(stderr, "cLog: post.cgi - read in template, preparing to loop\n"); 
 
 	/* read in the newstablemain template and point to the first line */
 	htmlReadTemplate("newstablemain", &HtmlTemplate);
@@ -170,7 +184,7 @@ int main () {
 		HtmlTemplate = HtmlTemplate->next;
 	}
 	
-	/* fprintf(stderr, "cLog: post.cgi - after loop\n"); */
+	fprintf(stderr, "cLog: post.cgi - after loop\n"); 
 
 
 	if(!strcmp(button,"Preview Story")) {
@@ -225,21 +239,24 @@ int main () {
 		if(strlen(bodyStr) != 0)
 			escConv(bodyStr, bodyStrEsc);
 		*/
-		sprintf(sqlBuffer,"INSERT INTO newsitems (title, intro, body, author, topic) VALUES (\'%s\',\'%s\',\'%s\',\'%s\',\'%s\')",
-			titleStrEsc, introStrEsc, '\0', principalName, topicStr);
-		
+		sprintf(sqlBuffer,"INSERT INTO newsitems (title, intro, timestamp, author, topic) VALUES (\'%s\',\'%s\',sysdate(),\'%s\',\'%s\')",
+			titleStrEsc, introStrEsc, principalName, topicStr);
+
 		err = cLogQueryNewsDB();
+		
 		if(err == 0)  {
 			printf("<p>Story posted - <a href=\"/\">Return Home</a>");		
-		} else htmlDBError(principalName, err);
-		free(titleStrEsc);
-		free(introStrEsc);
+		} else { 
+			printf("<p>Story post failed - <a href=\"/\">Return Home</a>");
+			printf("<p>SQL Error: %s", mysql_error(&cLogDB));
+			//htmlDBError(principalName, err);
+		}
 		/* free(bodyStrEsc); */		
 	}	
 	
 	
-	if(titleStr != NULL) free(titleStr);
-	if(introStr != NULL) free(introStr);
+	free(titleStr);
+	free(introStr);
 	/* if(bodyStr != NULL) free(bodyStr); */
 
 	htmlStaticPrint("contenttableend");

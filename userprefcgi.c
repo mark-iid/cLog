@@ -27,6 +27,19 @@
 #include "envar.h"
 #include "user.h"
 
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
+//char sqlBuffer[65000]; 
+
 int main() {
 	int returncode = 0;
 	int i=0;
@@ -50,13 +63,13 @@ int main() {
 		
 	
 	printf("<P>User Preferences Page");
-	printf("<BR>Currently there is really nothing you can do here<P>");
+	printf("<BR>Currently there is really nothing you can do here %s<P>", principalName);
 	
 	sprintf(sqlBuffer,"SELECT uid,username,realname,groups,lockout FROM users WHERE username = \'%s\'",
 		principalName);
 	
 	if(cLogQueryUserDB() != 0) {
-		free(principalName);
+		//if(principalName != NULL) free(principalName);
 		return 1;
 	}
 		
@@ -69,7 +82,7 @@ int main() {
 	}
 
 	if(cLogQueryUserDB() != 0) {
-		free(principalName);
+		//if(principalName != NULL) free(principalName);
 		return 1;
 	}
 		
@@ -83,7 +96,7 @@ int main() {
 	printf("</table>");
 	
 	
-	free(principalName);
+	//if(principalName != NULL) free(principalName);
 
 	htmlStaticPrint("contenttableend");
 	htmlStaticPrint("footer");

@@ -32,11 +32,23 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <mysql.h>
+#include <mysql/mysql.h>
 #include <string.h>
 #include <uuid/uuid.h>
 #include "clogdb.h"
 #include "cloghtml.h"
+
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
 
 void sessionIdGen(char *sessionID);
 
@@ -71,7 +83,7 @@ int main() {
 		htmlHeader("Error");
 		printf("Database Error");
 		htmlStaticPrint("footer");
-		free(principalName);
+		if(principalName != NULL) (principalName);
 		return 1;
 	} 
 	
@@ -100,7 +112,7 @@ int main() {
 		htmlHeader("Access Denied");
 		printf("<h3>Access Denied</h3><p>You do not have the proper credentials to access this resourse.</p>");	
 		htmlStaticPrint("footer");
-		free(principalName);
+		if(principalName != NULL) free(principalName);
 		return 1;
 	} else { 
 		htmlHeaderCookie("Logging In","SessionID",cookie);
@@ -120,7 +132,7 @@ int main() {
 	err = cLogQueryUserDB();
 	if(err != 0) htmlDBError(principalName, err);
 				
-	free(principalName);
+	if(principalName != NULL) free(principalName);
 	htmlStaticPrint("footer");
 	return 0;
 }

@@ -27,7 +27,7 @@ struct  field_rec {
   char *field_data;
 };
 
-struct field_rec *urldec;
+extern struct field_rec *urldec;
 
 void urlDecode(char *s);
 #endif

@@ -25,10 +25,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "clogdb.h"
 #include "cloghtml.h"
 #include "urldec.h"
 #include "sitevars.h"
+
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
+struct field_rec *urldec;
 
 int main () {
 	int maxstories = -1;
@@ -139,7 +153,7 @@ int main () {
 			printconvrss(row[2]);
 			printf("</description>\r\n");
 		}
-		printf("<author>%s@psu.edu</author>\r\n",row[3]);
+		printf("<author>%s</author>\r\n",row[3]);
 		printf("<link>http://%s/news.cgi?nid=%s</link>\r\n", var_site_url, row[0]);
 		printf("</item>\r\n");
 	}

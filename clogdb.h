@@ -22,21 +22,22 @@
 #ifndef H_CLOGDB
 #define H_CLOGDB
 
-#include <mysql.h>
+#include <mysql/mysql.h>
 #include "sitevars.h"
-MYSQL cLogDB;
+extern MYSQL cLogDB;
 
 /** is this as large as it needs to be? Or too large? 
   * note: this is not an overflow risk
   */
-char sqlBuffer[65000]; 
+extern char sqlBuffer[65000]; 
 
-MYSQL_RES *newsresult;
-MYSQL_RES *userresult;
-MYSQL_RES *commentresult;
-MYSQL_RES *topicresult;
+extern MYSQL_RES *newsresult;
+extern MYSQL_RES *userresult;
+extern MYSQL_RES *commentresult;
+extern MYSQL_RES *topicresult;
 
 void cLogInitDB();
+int cLogConnectDB();
 int cLogQueryUserDB();
 int cLogQueryNewsDB();
 int cLogQueryCommentDB();

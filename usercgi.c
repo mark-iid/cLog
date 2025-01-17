@@ -29,6 +29,18 @@
 #include "envar.h"
 #include "clogdb.h"
 
+char *var_admin_email;
+char *var_admin_name;
+char *var_site_name;
+char *var_site_root;
+char *var_site_templates;
+char *var_site_location;
+char *var_site_url;
+char *var_site_login_url;
+char *var_site_description;
+char *var_rss_show_description;
+char *var_site_create_user;
+
 void userlist();
 
 int main () {
@@ -74,9 +86,10 @@ int main () {
 	}
 
 	for (i = 0; i < numQueryString; i++) {
-		free(query[i].key);
-		free(query[i].val);
+		if (query[i].key != NULL) free(query[i].key);
+		if (query[i].val != NULL) free(query[i].val);
 	}
+
 	
 	if(strcmp(user,"userlist") ==0) {
 		userlist();
@@ -142,16 +155,15 @@ int main () {
 		printf("<P><font FACE=\"verdana,helvetica,arial\" SIZE=\"3\" COLOR=\"#ffffff\"><a href=\"news.cgi?nid=%s\">%s</a></font>",row[0],row[1]);
 		printf("<BR><font FACE=\"verdana,helvetica,arial\" SIZE=\"1\">Posted by %s ",userrow[0]);
 		if(allcommentcount == 1) {
-			printf("at %s with %li comment</font> &nbsp;&nbsp;",row[5],allcommentcount);
+			printf("at %s with %li comment</font> &nbsp;&nbsp;",row[4],allcommentcount);
 		} else {
-			printf("at %s with %li comments</font> &nbsp;&nbsp;",row[5],allcommentcount);
+			printf("at %s with %li comments</font> &nbsp;&nbsp;",row[4],allcommentcount);
 		}
 	}
 
 	mysql_free_result(newsresult);
 	mysql_free_result(userresult);
 	mysql_free_result(commentresult);
-	mysql_free_result(userresult);
 
 	htmlStaticPrint("contenttableend");
 	htmlStaticPrint("footer");
