@@ -51,6 +51,38 @@ char *var_site_create_user;
 
 struct field_rec *urldec;
 
+/**
+ * @file postcgi.c
+ * @brief CGI script for posting news stories.
+ *
+ * This script handles the submission and preview of news stories. It reads
+ * input from a web form, processes the data, and interacts with a MySQL
+ * database to store or preview the news story.
+ *
+ * The script performs the following tasks:
+ * - Initializes logging and database connections.
+ * - Reads and decodes form data from the POST request.
+ * - Validates user authorization to post news stories.
+ * - Fetches user and topic information from the database.
+ * - Processes the HTML template for displaying the news story.
+ * - Handles the "Preview Story" and "Submit Story" actions.
+ *
+ * @return 0 on success, 1 on failure.
+ *
+ * @note The script assumes the presence of several external functions and
+ *       variables, such as cLogInitDB(), cLogGetUsername(), cLogGetGroups(),
+ *       htmlHeader(), htmlStaticPrint(), urlDecode(), cLogQueryUserDB(),
+ *       cLogQueryTopicDB(), mysql_fetch_row(), htmlReadTemplate(), printconv(),
+ *       escConv(), cLogQueryNewsDB(), and mysql_error().
+ *
+ * @note The script also assumes the presence of several external structures
+ *       and types, such as MYSQL_ROW, TEMPLATELIST, and field_rec.
+ *
+ * @note The script logs errors and critical information to /tmp/post.log.
+ *
+ * @note The script currently does not handle the "body" field of the news
+ *       story, as it is commented out in the code.
+ */
 int main () {
 	int returncode = 0;
 	long numtopics = 0;

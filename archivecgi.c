@@ -47,6 +47,33 @@ char *var_site_description;
 char *var_rss_show_description;
 char *var_site_create_user;
 
+/**
+ * @file archivecgi.c
+ * @brief This file contains the main function for generating the news archive page.
+ *
+ * The main function connects to the database, retrieves news items and their associated comments,
+ * and generates an HTML page displaying the news archive.
+ *
+ * @details
+ * The function performs the following steps:
+ * 1. Initializes the database connection.
+ * 2. Generates the HTML header for the news archive page.
+ * 3. Retrieves the username and group information for the current user.
+ * 4. Retrieves the total number of news stories from the database.
+ * 5. Retrieves the latest news stories up to a specified limit.
+ * 6. For each news story, retrieves the associated comments and user information.
+ * 7. Generates the HTML content for each news story, including the number of comments.
+ * 8. Frees the database result sets and generates the HTML footer.
+ *
+ * @note The maximum number of news stories (`maxstories`) and the maximum number of archived stories (`maxarchive`)
+ *       are currently hardcoded but should be made configurable in the future.
+ *
+ * @todo
+ * - Drop the `maxarchive` number when the search function is created.
+ * - Make `maxstories` a user-configurable option.
+ *
+ * @return Returns 0 on successful execution, exits with `EXIT_FAILURE` on critical errors.
+ */
 int main () {
 	int maxarchive = 1000; /* TODO: drop this number when search function is created */
 	int maxstories = 10;  /* TODO: make this a user configurable option */

@@ -44,6 +44,25 @@ char *var_site_description;
 char *var_rss_show_description;
 char *var_site_create_user;
 
+/**
+ * @file editnewscgi.c
+ * @brief CGI program to display and edit news items.
+ *
+ * This program is a CGI script that handles the display and editing of news items.
+ * It initializes the database connection, parses the query string for the news item ID (nid),
+ * and displays the news item along with options to edit or delete it.
+ * 
+ * The program performs the following steps:
+ * 1. Initializes the database connection.
+ * 2. Outputs the HTML header for the news item.
+ * 3. Retrieves the username and groups of the principal user.
+ * 4. Parses the query string to extract the news item ID (nid).
+ * 5. Displays the left-side navigation and content table.
+ * 6. Displays the news item and options for editing or deleting it.
+ * 7. Outputs the HTML footer.
+ *
+ * @return 0 on successful execution, exits with EXIT_FAILURE on critical error.
+ */
 int main () {
 	int returncode = 0;
 	int i;

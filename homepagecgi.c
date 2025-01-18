@@ -45,6 +45,29 @@ char *var_site_description;
 char *var_rss_show_description;
 char *var_site_create_user;
 
+/**
+ * @file homepagecgi.c
+ * @brief CGI script for handling homepage requests and user authentication.
+ *
+ * This script initializes the database connection, retrieves the username and groups
+ * for the authenticated user, and generates the appropriate HTML response based on
+ * the user's authentication status and group membership.
+ *
+ * The script performs the following steps:
+ * 1. Initializes the database connection.
+ * 2. Retrieves the username of the authenticated user.
+ * 3. If the username lookup fails, an error message is displayed.
+ * 4. If the username is empty and the REMOTE_USER environment variable is set,
+ *    the user is redirected to the login URL.
+ * 5. Generates the HTML header with the site description.
+ * 6. Retrieves the groups for the authenticated user.
+ * 7. If the group lookup fails, an error message is displayed.
+ * 8. Generates the left-side navigation with the user's name and groups.
+ * 9. Displays the main content, including news and other static content.
+ * 10. Generates the HTML footer.
+ *
+ * @return int Returns 0 on successful execution.
+ */
 int main () {
 
 	cLogInitDB();	

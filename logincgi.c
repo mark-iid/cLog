@@ -52,6 +52,27 @@ char *var_site_create_user;
 
 void sessionIdGen(char *sessionID);
 
+/**
+ * @file logincgi.c
+ * @brief CGI script for handling user login and session management.
+ *
+ * This script handles user login by verifying the REMOTE_USER environment variable,
+ * generating a session cookie, and interacting with a MySQL database to manage user
+ * sessions and credentials.
+ *
+ * The script performs the following steps:
+ * 1. Initializes the database connection.
+ * 2. Checks if the REMOTE_USER environment variable is set.
+ * 3. Generates a session cookie.
+ * 4. Queries the database for the user associated with the REMOTE_USER.
+ * 5. If the user does not exist and user creation is allowed, creates a new user.
+ * 6. If the user does not exist and user creation is not allowed, denies access.
+ * 7. If the user exists, logs the user in and sets the session cookie in the database.
+ * 8. Handles any database errors that occur during the process.
+ * 9. Frees allocated memory and prints the footer.
+ *
+ * @return 0 on success, 1 on error.
+ */
 int main() {
 	char *principalName; /* REMOTE_USER */
 	char cookie[32]; /* Session Cookie - DCE UUID */
@@ -137,8 +158,15 @@ int main() {
 	return 0;
 }
 
-/** 
- * generate unique DCE UUID number, then convert it to ascii
+/**
+ * @brief Generates a session ID string from a UUID.
+ *
+ * This function generates a UUID and converts it into a string representation
+ * to be used as a session ID. The generated session ID is stored in the 
+ * provided character array.
+ *
+ * @param sessionID A character array where the generated session ID will be stored.
+ *                  The array should be large enough to hold the resulting string.
  */
 void sessionIdGen(char *sessionID) {
 	uuid_t sessionUuid;

@@ -44,6 +44,36 @@ char *var_rss_show_description;
 char *var_site_create_user;
 struct field_rec *urldec;
 
+/**
+ * @file rsscgi.c
+ * @brief Generates an RSS feed based on query parameters.
+ *
+ * This program generates an RSS feed in XML format based on the query parameters
+ * provided in the URL. It fetches news items from a MySQL database and formats
+ * them into an RSS feed.
+ *
+ * Query Parameters:
+ * - topic: The topic ID to filter news items by topic.
+ * - author: The author ID to filter news items by author.
+ * - maxentries: The maximum number of news items to include in the feed.
+ *
+ * If no maxentries parameter is specified, the default value is 10.
+ *
+ * The generated RSS feed includes the site name, language, generator, managing editor,
+ * webmaster, link, description, and an image. Each news item in the feed includes the
+ * title, description (if enabled), author, and link to the full news item.
+ *
+ * The program uses the following functions:
+ * - cLogInitDB(): Initializes the database connection.
+ * - urlDecode(): Decodes the URL-encoded query string.
+ * - cLogQueryNewsDB(): Executes a query on the news database.
+ * - printconvrss(): Prints a string with special characters converted for RSS.
+ *
+ * The program handles errors by printing an error message in the RSS feed and
+ * exiting with a failure status.
+ *
+ * @return 0 on success, exits with failure status on error.
+ */
 int main () {
 	int maxstories = -1;
 	long nrows = 0;

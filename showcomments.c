@@ -29,6 +29,12 @@
 #include "showcomments.h"
 #include "cloghtml.h"
 
+/**
+ * @brief Structure to represent a comment.
+ * 
+ * This structure holds information about a comment, including its ID, 
+ * node ID, parent ID, language ID, author, title, and timestamp.
+ */
 typedef struct {
 	char *cid;
 	char *nid;
@@ -42,7 +48,32 @@ typedef struct {
 
 void showchildcomments(char *pid, Comment_struct *comments,int commentcount);
 
-/* Show all comments belonging to news item nnid with parent comment id npid) */
+void showcomments(char *principalName, char *principalGroups, int nnid, int npid);
+
+void showchildcomments(char *pid, Comment_struct *comments, int commentcount);
+
+/**
+ * @brief Displays comments for a given node and parent ID.
+ *
+ * This function retrieves and displays comments from a MySQL database based on the provided node ID (nnid) 
+ * and parent ID (npid). It also checks the user's group permissions to determine which comments to display.
+ *
+ * @param principalName The name of the principal user.
+ * @param principalGroups The groups the principal user belongs to.
+ * @param nnid The node ID for which comments are to be displayed.
+ * @param npid The parent ID for which comments are to be displayed.
+ *
+ * The function performs the following steps:
+ * 1. Converts the node ID and parent ID to strings.
+ * 2. Checks if the user has read permissions for level 2 comments.
+ * 3. Queries the database to retrieve comments based on the node ID and parent ID.
+ * 4. Allocates memory for the comments and populates the comments structure.
+ * 5. Retrieves the author's real name from the users table.
+ * 6. Displays the comments using an HTML template.
+ * 7. Recursively displays child comments.
+ *
+ * The function handles critical errors by printing an error message and exiting the program.
+ */
 void showcomments(char *principalName, char *principalGroups, int nnid, int npid) {
 	long commentcount;
 	MYSQL_ROW row;
@@ -59,7 +90,6 @@ void showcomments(char *principalName, char *principalGroups, int nnid, int npid
 	
 	itoa(nnid,nid);
 	itoa(npid,pid);
-	
 	
 	if(!strstr(principalGroups,"l2read")) {
 		sprintf(sqlBuffer,"SELECT * FROM comments WHERE nid = \'%s\' AND lid < \'2\' AND pid != \'%s\'",nid,pid);
@@ -102,10 +132,6 @@ void showcomments(char *principalName, char *principalGroups, int nnid, int npid
 		comments[i].title = strdup(row[6]);
 		comments[i].timestamp = strdup(row[7]);
 	}
-	
-
-
-
 	if(!strstr(principalGroups,"l2read")) {
 		sprintf(sqlBuffer,"SELECT * FROM comments WHERE nid = \'%s\' AND lid < \'2\' AND pid = \'%s\'",nid,pid);
 		if(cLogQueryCommentDB()) {
@@ -121,10 +147,8 @@ void showcomments(char *principalName, char *principalGroups, int nnid, int npid
 			exit(EXIT_FAILURE);
 		}
 	}
-	
-        htmlReadTemplate("commenttablemain", &HtmlTemplate);
-        htmlTemplateStart = (char*) HtmlTemplate;                                                                     
-
+	htmlReadTemplate("commenttablemain", &HtmlTemplate);
+	htmlTemplateStart = (char*) HtmlTemplate;                                                                     
 	while((row = mysql_fetch_row(commentresult))) {
 		/* timedateformat(row[7], stimedate); */
 	
@@ -173,6 +197,17 @@ void showcomments(char *principalName, char *principalGroups, int nnid, int npid
 	return;
 }
 
+/**
+ * @brief Recursively displays child comments in a nested list format.
+ *
+ * This function iterates through a list of comments and displays each comment
+ * that matches the given parent ID (pid) in an HTML unordered list format. It
+ * also recursively displays any child comments associated with each comment.
+ *
+ * @param pid The parent ID of the comments to display.
+ * @param comments An array of Comment_struct containing the comments.
+ * @param commentcount The total number of comments in the array.
+ */
 void showchildcomments(char *pid, Comment_struct *comments,int commentcount) {
 	int i;
 	char timestamp[15];

@@ -47,6 +47,29 @@ char *var_site_description;
 char *var_rss_show_description;
 char *var_site_create_user;
 
+/**
+ * @file newspostcgi.c
+ * @brief CGI script for submitting news posts.
+ *
+ * This script handles the submission of news posts by authorized users.
+ * It connects to the database, retrieves available topics, and displays
+ * a form for submitting a news story.
+ *
+ * The script performs the following steps:
+ * 1. Initializes the database connection.
+ * 2. Outputs the HTML header.
+ * 3. Retrieves the username and groups of the current user.
+ * 4. Checks if the user is authorized to post stories.
+ * 5. Retrieves the list of available topics from the database.
+ * 6. Displays the form for submitting a news story.
+ * 7. Outputs the HTML footer.
+ *
+ * The form includes fields for selecting a topic, entering a title, and
+ * writing the news item. It also provides options to submit or preview
+ * the story, and to reset the form.
+ *
+ * @return Returns 0 on success, or 1 on authorization failure.
+ */
 int main () {
 	int returncode = 0;
 	int i = 0;

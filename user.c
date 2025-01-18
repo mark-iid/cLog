@@ -24,23 +24,21 @@
 #include "clogdb.h"
 #include "envar.h"
 
-
-/** cLogGetUsername
- * checks for a sessionID cookie and looks up the matching 
- * userid in the database. 
+/**
+ * cLogGetUsername - Retrieves the username associated with the session cookie.
+ * @username: A pointer to a buffer where the username will be stored.
  *
- * After a successful return, username must be freed.
+ * This function retrieves the username associated with the session cookie
+ * from the HTTP_COOKIE environment variable. It parses the cookies, extracts
+ * the session cookie, and queries the database to find the corresponding
+ * username. The username is then copied to the provided buffer.
  *
- * Successful: returns 0 as error code and puts username in 'username'
- * Unsuccessful error codes: 
- *  10 - No cookie found
- *  15 - No match for session cookie in database
- *  16 - More than one match for session cookie in database
- *  20 - Unable to connect to database
- *  30 - Database quary failed
- *
- * Known Issues:
- *  cookies structure not released - memory leak
+ * Return: 
+ *  0  - Success, username retrieved and stored in the provided buffer.
+ * 10 - Session cookie not found.
+ * 15 - No matching user found in the database.
+ * 16 - Multiple matching users found in the database.
+ * 30 - Database lookup failure.
  */
 int cLogGetUsername(char *username) {
 	long nrows = 0; /* number of rows returned from query */
@@ -93,6 +91,18 @@ int cLogGetUsername(char *username) {
 	}
 }
 
+/**
+ * @brief Retrieves the groups associated with a given principal (user).
+ *
+ * This function queries the database to get the groups for the specified principal (user).
+ * If the principal name is empty, it returns an error code 10. If the query fails or no
+ * groups are found for the principal, it returns an error code 20. Otherwise, it copies
+ * the groups to the provided buffer and returns 0.
+ *
+ * @param principalName The name of the principal (user) whose groups are to be retrieved.
+ * @param principalGroups A buffer to store the retrieved groups.
+ * @return int 0 on success, 10 if the principal name is empty, 20 if the query fails or no groups are found.
+ */
 int cLogGetGroups(char *principalName, char *principalGroups) {
 	MYSQL_ROW row;
 	long nrows;

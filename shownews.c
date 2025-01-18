@@ -30,9 +30,35 @@
 
 void timedateformat(char unformatted[], char stimedate[]);
 
-/*
- * Shows news sections with optional links depending on the user's
- * group information.
+
+/**
+ * @brief Displays news items based on the provided parameters.
+ *
+ * This function retrieves and displays news items from a database. It can either
+ * display the latest news items or a specific news item based on the provided
+ * news ID (nid). The function also formats and displays various details about
+ * each news item, such as the title, author, timestamp, introduction, topic, 
+ * and comments.
+ *
+ * @param principalName The name of the principal user.
+ * @param principalGroups The groups the principal user belongs to.
+ * @param nid The news ID to display. If 0, the latest news items are displayed.
+ *
+ * The function performs the following steps:
+ * 1. Determines the read level based on the principal's groups.
+ * 2. If nid is 0, retrieves the latest news items up to a maximum of 10.
+ * 3. If nid is not 0, retrieves the specific news item with the given nid.
+ * 4. Reads the HTML template for displaying news items.
+ * 5. For each news item retrieved:
+ *    - Formats the timestamp.
+ *    - Looks up the author of the news item.
+ *    - Looks up the topic information.
+ *    - Resets the template linked list pointer.
+ *    - Processes and replaces special tags in the template with actual data.
+ *    - Displays the formatted news item.
+ *
+ * The function handles various critical errors by printing an error message
+ * and exiting the program.
  */
 void shownews(char *principalName, char *principalGroups, char *nid) {
 	MYSQL_ROW row = NULL;	

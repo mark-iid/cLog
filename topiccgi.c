@@ -46,6 +46,28 @@ char *var_site_create_user;
 
 void topiclist();
 
+/**
+ * @brief CGI script to display news topics and related news items.
+ *
+ * This script handles the display of news topics and their associated news items.
+ * It retrieves the topic ID from the query string, fetches the topic details from the database,
+ * and displays the news items under that topic. It also handles user authentication and 
+ * authorization to determine the read level.
+ *
+ * The script performs the following steps:
+ * 1. Initializes the database connection.
+ * 2. Outputs the HTML header.
+ * 3. Checks user authentication and group membership.
+ * 4. Parses the query string to get the topic ID.
+ * 5. If the topic ID is "topiclist", it displays the list of topics.
+ * 6. Fetches the topic details from the database.
+ * 7. Fetches the news items under the topic from the database.
+ * 8. Displays the topic details and news items.
+ * 9. Fetches and displays the comments count for each news item.
+ * 10. Frees the allocated resources and outputs the HTML footer.
+ *
+ * @return 0 on success, exits with EXIT_FAILURE on critical errors.
+ */
 int main () {
 	int readlevel = 0;
 	int maxarchive = 100;
@@ -179,6 +201,26 @@ int main () {
 }
 
 
+/**
+ * @brief Generates an HTML table listing topics from the database.
+ *
+ * This function queries the database for all topics and generates an HTML table
+ * displaying the topics. Each topic is displayed with an image and a link to the
+ * topic's page. The images are located in the "images/topics/" directory.
+ *
+ * The function performs the following steps:
+ * 1. Executes a SQL query to select all topics from the database.
+ * 2. Checks if the query was successful. If not, prints an error message and exits.
+ * 3. Checks if any topics were returned by the query. If not, prints an error message and exits.
+ * 4. Iterates over the topics and generates an HTML table row for each topic.
+ * 5. Each row contains an image and a link to the topic's page.
+ *
+ * @note The function uses a global buffer `sqlBuffer` for constructing file paths.
+ *       This is not ideal and should be refactored to use a separate buffer.
+ *
+ * @warning The function exits the program on critical errors, which may not be
+ *          suitable for all applications.
+ */
 void topiclist() {
 	long numtopics = 0;
 	MYSQL_ROW topicrow;

@@ -41,51 +41,62 @@ int getDBLogin(char host[], char name[], char user[], char pwd[]);
 int cLogGetSiteVars();
 
 
-/** cLogInitDB
- * calls cLogConnectDB and cLogGetSiteVars
- * Terminates with an error message if unsucessful
+/**
+ * @brief Initializes the database connection and site variables.
+ *
+ * This function attempts to connect to the database and initialize
+ * global site variables. If the database connection fails, it outputs
+ * an HTML error message and terminates the program. Similarly, if the
+ * initialization of global site variables fails, it outputs an HTML
+ * error message and terminates the program.
+ *
+ * @note This function will terminate the program if any critical error occurs.
  */
- void cLogInitDB() {
-	 int err = 0;
-	 err = cLogConnectDB();
-	 if(err != 0) {
-		printf("content-type: text/html; charset=utf-8\r\n\r\n");
-		printf("<html><head><title>Critical Error</title><head>");
-		printf("<body><p>Critical error: database connect failed");
-		printf("<p>Error #%i</body></html>",err);
-		exit(EXIT_FAILURE);
-	 }
-	 if(cLogGetSiteVars() != 0) {
- 		printf("content-type: text/html; charset=utf-8\r\n\r\n");
-		printf("<html><head><title>Critical Error</title><head>");
-		printf("<body><p>Critical Error: Global Variable Init Failure");
-		printf("</body></html>");
-		exit(EXIT_FAILURE);
-	 }
- }
+void cLogInitDB() {
+	int err = 0;
+	err = cLogConnectDB();
+	if(err != 0) {
+	printf("content-type: text/html; charset=utf-8\r\n\r\n");
+	printf("<html><head><title>Critical Error</title><head>");
+	printf("<body><p>Critical error: database connect failed");
+	printf("<p>Error #%i</body></html>",err);
+	exit(EXIT_FAILURE);
+	}
+	if(cLogGetSiteVars() != 0) {
+	printf("content-type: text/html; charset=utf-8\r\n\r\n");
+	printf("<html><head><title>Critical Error</title><head>");
+	printf("<body><p>Critical Error: Global Variable Init Failure");
+	printf("</body></html>");
+	exit(EXIT_FAILURE);
+	}
+}
 
-/** cLogConnectDB
- * Connects to the database
- * returns 0 if successful, 1 if connect failed
+/**
+ * @brief Connects to the database using MySQL.
+ *
+ * This function retrieves the database login details, initializes a MySQL connection,
+ * and attempts to connect to the specified database.
+ *
+ * @return int Returns 0 on success, or an error code on failure:
+ *             - 1: Unable to get database login details.
+ *             - 2: mysql_init() failed.
+ *             - 3: mysql_real_connect() failed.
  */
 int cLogConnectDB() {
     char dbhost[256];
     char dbname[256];
     char dbpwd[256]; 
     char dbuser[256];
-
     // Get database login details
     if (getDBLogin(dbhost, dbname, dbuser, dbpwd) != 0) {
         fprintf(stderr, "Error: Unable to get database login details.\n");
         return 1;
     }
-
     // Initialize MySQL connection
     if (mysql_init(&cLogDB) == NULL) {
         fprintf(stderr, "Error: mysql_init() failed.\n");
         return 2;
     }
-
     // Connect to the database
     if (mysql_real_connect(&cLogDB, dbhost, dbuser, dbpwd, dbname, 0, NULL, 0) == NULL) {
         fprintf(stderr, "Error: mysql_real_connect() failed.\n");
@@ -93,7 +104,6 @@ int cLogConnectDB() {
         mysql_close(&cLogDB);
         return 3;
     }
-
     return 0;
 }
 
@@ -101,9 +111,18 @@ void cLogCloseDB() {
     mysql_close(&cLogDB);
 }
 
-/** cLogQueryUserDB()
- * Querys the user table in the database based on what is in sqlBuffer
- * returns 0 if successful, 1 if query failed
+/**
+ * @brief Executes a query on the user database and stores the result.
+ *
+ * This function sends a query to the MySQL database using the global 
+ * `cLogDB` connection and the `sqlBuffer` query string. It then attempts 
+ * to store the result of the query in `userresult`.
+ *
+ * @return Returns 0 on success, or 1 if an error occurs.
+ *
+ * If an error occurs during the execution of the query or while storing 
+ * the result, an error message is printed to `stderr` and the function 
+ * returns 1. The error message includes the MySQL error string.
  */
 int cLogQueryUserDB() {
 	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
@@ -116,9 +135,19 @@ int cLogQueryUserDB() {
 	return 0;
 }
 
-/** cLogQueryNewsDB()
- * Querys the news table in the database based on what is in sqlBuffer
- * returns 0 if successful, 1 if query failed
+
+/**
+ * @brief Executes a query on the news database and stores the result.
+ *
+ * This function sends a query to the MySQL database using the global 
+ * `cLogDB` connection and the query stored in `sqlBuffer`. It then 
+ * attempts to store the result of the query in `newsresult`.
+ *
+ * @return Returns 0 on success, or 1 if an error occurs.
+ *
+ * If an error occurs during the execution of the query or while storing 
+ * the result, an error message is printed to `stderr` and the function 
+ * returns 1. The error message includes the MySQL error code and message.
  */
 int cLogQueryNewsDB() {
 	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
@@ -131,9 +160,15 @@ int cLogQueryNewsDB() {
 	return 0;
 }
 
-/** cLogQueryCommentDB()
- * Querys the comment table in the database based on what is in sqlBuffer
- * returns 0 if successful, 1 if query failed
+/**
+ * @brief Executes a query on the comment database and stores the result.
+ *
+ * This function sends a query to the MySQL database using the global `cLogDB` connection
+ * and the query stored in `sqlBuffer`. It then attempts to store the result of the query
+ * in `commentresult`. If an error occurs during the process, it prints an error message
+ * to `stderr` and returns 1. If the query is successful, it returns 0.
+ *
+ * @return int Returns 0 on success, 1 on failure.
  */
 int cLogQueryCommentDB() {
 	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
@@ -146,9 +181,17 @@ int cLogQueryCommentDB() {
 	return 0;
 }
 
-/** cLogQueryTopicDB()
- * Querys the topic table in the database based on what is in sqlBuffer
- * returns 0 if successful, 1 if query failed
+
+/**
+ * Executes a query on the cLogDB database and stores the result.
+ *
+ * This function sends a query to the cLogDB database using the SQL statement
+ * stored in `sqlBuffer`. It then attempts to store the result of the query.
+ * If an error occurs during the query or while storing the result, an error
+ * message is printed to `stderr` and the function returns 1. Otherwise, the
+ * function returns 0.
+ *
+ * @return 0 if the query and result storage are successful, 1 if an error occurs.
  */
 int cLogQueryTopicDB() {
 	mysql_real_query(&cLogDB,sqlBuffer,(unsigned)strlen(sqlBuffer));
@@ -161,9 +204,32 @@ int cLogQueryTopicDB() {
 	return 0;
 }
 
-/** cLogQueryVarsDB()
- * Querys the variables table in the database based on what is in sqlBuffer
- * returns 0 if successful, 1 if query failed
+/**
+ * cLogGetSiteVars - Retrieves site variables from the database and stores them in global variables.
+ *
+ * This function executes a SQL query to fetch all records from the 'vars' table in the database.
+ * It then iterates through the result set and assigns the values to corresponding global variables
+ * based on the variable name.
+ *
+ * Return:
+ *   0 on success, 1 if there is an error executing the SQL query.
+ *
+ * Global Variables:
+ *   var_admin_email - Stores the admin email address.
+ *   var_admin_name - Stores the admin name.
+ *   var_site_name - Stores the site name.
+ *   var_site_root - Stores the site root path.
+ *   var_site_templates - Stores the site templates path.
+ *   var_site_location - Stores the site location.
+ *   var_site_url - Stores the site URL.
+ *   var_site_login_url - Stores the site login URL.
+ *   var_site_description - Stores the site description.
+ *   var_rss_show_description - Stores the RSS show description flag.
+ *   var_site_create_user - Stores the site create user flag.
+ *
+ * Note:
+ *   The function uses `strdup` to allocate memory for the global variables. It is the caller's
+ *   responsibility to free this memory when it is no longer needed.
  */
 int cLogGetSiteVars() {
 	MYSQL_RES *varsresult;
@@ -204,9 +270,17 @@ int cLogGetSiteVars() {
 	return 0;
 }
 
-/** cLogGetNewsTitle(int nid)
- * Returns the title field of a news item entry in the DB
- * int nid  = News DB ID
+/**
+ * cLogGetNewsTitle - Retrieves the title of a news item from the database.
+ * @nid: The news item ID.
+ *
+ * This function takes a news item ID, constructs a SQL query to fetch the title
+ * of the news item from the database, and returns the title as a string. If the
+ * query fails or if the news item ID is invalid (i.e., no rows or more than one
+ * row is returned), the function prints an error message, displays the footer,
+ * and exits the program.
+ *
+ * Return: A pointer to the title string of the news item.
  */
 char *cLogGetNewsTitle(int nid) {
 	MYSQL_ROW row = NULL;
@@ -228,9 +302,18 @@ char *cLogGetNewsTitle(int nid) {
 	return row[0];
 }
 
-/** getDBLogin(char name[], char pwd[])
- * Reads the first line in the file specified in the environment 
- * variable CLOGDB and returns this value (the db password)
+/**
+ * @brief Reads database login credentials from a file.
+ *
+ * This function opens the file "clog.cgi" and reads the database host, name,
+ * user, and password from it. Each credential is expected to be on a separate
+ * line in the file. The newline characters at the end of each line are removed.
+ *
+ * @param host A character array to store the database host.
+ * @param name A character array to store the database name.
+ * @param user A character array to store the database user.
+ * @param pwd A character array to store the database password.
+ * @return Returns 0 on success, or 1 if an error occurs (e.g., file cannot be opened or read).
  */
 int getDBLogin(char host[], char name[], char user[], char pwd[]) {
     FILE *file = fopen("clog.cgi", "r");
@@ -271,10 +354,16 @@ int getDBLogin(char host[], char name[], char user[], char pwd[]) {
     return 0;
 }
 	
-/** itoa
- * Converts integers to character strings
- * This is straight out of a K&R example
-*/
+/**
+ * Converts an integer to a string.
+ *
+ * This function takes an integer `n` and converts it to a null-terminated string
+ * stored in the character array `s`. The function handles negative numbers by
+ * storing a '-' character at the beginning of the string.
+ *
+ * @param n The integer to be converted.
+ * @param s The character array where the resulting string will be stored.
+ */
 void itoa(int n, char s[]) {
 	int i, sign;
 	unsigned int num;
@@ -293,9 +382,14 @@ void itoa(int n, char s[]) {
 	reverse(s);
 }
 
-/** reverse
- * reverses a character string_array
- * This is straight out of a K&R example
+/**
+ * @brief Reverses a string in place.
+ *
+ * This function takes a null-terminated string and reverses its characters
+ * in place. The reversal is done by swapping characters from the beginning
+ * and end of the string moving towards the center.
+ *
+ * @param s The string to be reversed. It must be a null-terminated character array.
  */
 void reverse(char s[]) {
 	int c, i, j;
@@ -306,9 +400,16 @@ void reverse(char s[]) {
 		s[j] = c;
 	}
 }
-/** escConv
- * converts a string with single and double quotes into a
- *	string with escape characters instead
+
+/**
+ * @brief Converts escape characters in a string.
+ *
+ * This function takes an input string `from` and converts certain characters
+ * to their escaped equivalents, storing the result in the output string `to`.
+ * Specifically, it converts double quotes (") to \" and single quotes (') to \'.
+ *
+ * @param from The input string to be converted.
+ * @param to The output string where the converted result will be stored.
  */
 void escConv(char *from, char *to) {
 	while (*from) {
@@ -326,9 +427,18 @@ void escConv(char *from, char *to) {
 	*to = '\0';
 }
 
-/** timedateformat
- * Takes a TIMESTAMP MySQL field and converts it to
- * 	a human readable time and date string
+
+/**
+ * Formats a given unformatted date-time string into a more readable format.
+ *
+ * The input date-time string should be in the format "YYYYMMDDHHMMSS".
+ * The output formatted string will be in the format "HH:MM:SS on MM/DD/YYYY".
+ *
+ * @param unformatted The input date-time string in the format "YYYYMMDDHHMMSS".
+ *                    It should be a null-terminated string with a length of 14 characters.
+ * @param stimedate   The output buffer where the formatted date-time string will be stored.
+ *                    It should be large enough to hold the formatted string, which is 23 characters
+ *                    including the null terminator.
  */
 void timedateformat(char unformatted[], char stimedate[]) {
 	if(strlen(unformatted) > 14) return;

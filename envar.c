@@ -28,6 +28,18 @@
  *	int *n the number of key/val pairs parsed
  *	Envar * -> structure containing key/val pairs
  */ 
+/**
+ * @brief Parses an environment variable string into an array of Envar structures.
+ *
+ * This function takes a string representing environment variables in the format
+ * "key1=value1;key2=value2;..." and parses it into an array of Envar structures.
+ *
+ * @param env The environment variable string to parse. If NULL, the function returns NULL.
+ * @param n A pointer to an integer where the function will store the number of parsed Envar structures.
+ * @return A pointer to an array of Envar structures, or NULL if the input string is NULL.
+ *
+ * The caller is responsible for freeing the memory allocated for the returned array.
+ */
 Envar *parseEnVar(char *env, int *n)
 {
         Envar *c = NULL;

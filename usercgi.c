@@ -43,6 +43,26 @@ char *var_site_create_user;
 
 void userlist();
 
+/**
+ * @brief CGI script to display user information and their news items.
+ *
+ * This script retrieves and displays user information and their associated news items
+ * from a MySQL database. It handles various error conditions and outputs HTML content.
+ *
+ * @details
+ * The script performs the following steps:
+ * - Initializes the database connection.
+ * - Retrieves the username and groups of the principal user.
+ * - Parses the QUERY_STRING environment variable to get the user ID.
+ * - If the user ID is "userlist", it calls the userlist() function and exits.
+ * - Queries the database for the user information based on the user ID.
+ * - Queries the database for news items authored by the user.
+ * - For each news item, it queries the database for comments and displays the news item
+ *   along with the comment count.
+ * - Frees the allocated resources and prints the footer.
+ *
+ * @return Returns 0 on success, exits with EXIT_FAILURE on critical errors.
+ */
 int main () {
 	int readlevel = 0;
 	int maxarchive = 100;
@@ -172,6 +192,26 @@ int main () {
 }
 
 
+/**
+ * @brief Generates an HTML table listing users who belong to the 'newspost' group.
+ *
+ * This function queries the database for users who are part of the 'newspost' group,
+ * and generates an HTML table displaying these users. Each user is displayed with
+ * their associated image (if available) and a link to their user profile.
+ *
+ * @note The function uses a global buffer `sqlBuffer` for both SQL queries and file paths,
+ *       which is not a recommended practice.
+ *
+ * @details
+ * - The function first constructs and executes an SQL query to select users from the 'users' table
+ *   where the 'groups' column contains 'newspost'.
+ * - If the query fails or returns no rows, an error message is printed and the program exits.
+ * - The function then iterates over the result set, generating an HTML table row for each user.
+ * - For each user, it checks if an image file exists for the user and includes it in the table if available.
+ * - Each user is displayed with a link to their profile and their name.
+ *
+ * @warning The function exits the program on critical errors, which may not be suitable for all applications.
+ */
 void userlist() {
 	long numusers = 0;
 	MYSQL_ROW userrow;

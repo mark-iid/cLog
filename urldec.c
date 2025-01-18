@@ -23,6 +23,20 @@
 #include <stdio.h>
 #include "urldec.h"
 
+/**
+ * @brief Decodes a URL-encoded string.
+ *
+ * This function takes a URL-encoded string and decodes it, converting
+ * percent-encoded characters back to their original form and replacing
+ * '+' characters with spaces. The decoded fields are stored in a linked
+ * list of `struct field_rec`.
+ *
+ * @param s The URL-encoded string to decode.
+ *
+ * @note The function modifies the input string in place and allocates
+ * memory for the decoded fields and their data. It is the caller's
+ * responsibility to free this memory.
+ */
 void urlDecode(char *s) {
 	char end_str[]="";
 	char *d,*i;

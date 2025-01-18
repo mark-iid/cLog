@@ -49,6 +49,26 @@ char *var_rss_show_description;
 char *var_site_create_user;
 struct field_rec *urldec;
 
+/**
+ * @file commentscgi.c
+ * @brief CGI script to handle comments display.
+ *
+ * This script processes HTTP GET requests to display comments based on 
+ * provided newsID (nid) and parentID (pid). It initializes the database 
+ * connection, retrieves the username and groups, decodes the URL parameters, 
+ * and displays the comments if both nid and pid are provided.
+ *
+ * @details
+ * - Initializes the database connection using cLogInitDB().
+ * - Retrieves the username and groups using cLogGetUsername() and cLogGetGroups().
+ * - Decodes the URL parameters from the QUERY_STRING environment variable.
+ * - Extracts the nid and pid parameters from the decoded URL.
+ * - Displays the comments using showcomments() if both nid and pid are provided.
+ * - Displays an error message if either nid or pid is missing.
+ * - Frees allocated memory for nid and pid before exiting.
+ *
+ * @return Returns 0 on successful execution.
+ */
 int main () {
   char *nid = NULL;	/* newsID */
 	char *pid = NULL;	/* parentID */

@@ -37,15 +37,22 @@
 int htmlGetLine(FILE *file, char *buffer);
 void htmlMainBox(char *principalName, char *principalGroups);
 
-/** htmlGetLine
- * Reads in one line (until EOL) from open file and 
- *  puts it into the buffer
- * Parameters: 
- *  FILE *file - file descriptor
- *  char *buffer - line buffer (256 character array)
- * Returns:
- *  0 - success
- *  1 - end of file
+/**
+ * @brief Reads a line from an HTML file.
+ *
+ * This function reads characters from the given file stream until it encounters
+ * a newline character ('\n'), a carriage return character ('\r'), or the end of
+ * the file (EOF). The read characters are stored in the provided buffer.
+ *
+ * @param file A pointer to the FILE object that identifies the input stream.
+ * @param buffer A pointer to a character array where the read line will be stored.
+ *               The buffer should be large enough to hold the line, including the
+ *               terminating null character.
+ * @return An integer indicating the result of the operation:
+ *         - 0: Line read successfully.
+ *         - 1: End of file reached.
+ *         - 2: Buffer length exceeded.
+ *         - 10: Invalid file pointer.
  */
 int htmlGetLine(FILE *file, char *buffer) {
 	int i = 0;
@@ -65,10 +72,30 @@ int htmlGetLine(FILE *file, char *buffer) {
 	return 2; /* buffer length exceeded */
 }
 
-/** htmlHeader
- * Prints the HTML header and title 
- * Parameters:
- *  char *title - Page title
+
+/**
+ * @brief Generates and prints the HTML header for a web page.
+ *
+ * This function reads an HTML template file, replaces placeholders with actual values,
+ * and prints the resulting HTML header to the standard output. It also prints the
+ * content-type header for an HTML response.
+ *
+ * @param title The title to be inserted into the HTML header.
+ *
+ * The function performs the following steps:
+ * 1. Prints the content-type header for an HTML response.
+ * 2. Constructs the full path to the HTML template file.
+ * 3. Opens the HTML template file for reading.
+ * 4. Reads the template file line by line, replacing placeholders with actual values:
+ *    - "[% title %]" is replaced with the site name and the provided title.
+ *    - "[% css %]" triggers a call to `htmlStaticPrint` with "ssi/css" as the argument.
+ * 5. Prints the processed lines to the standard output.
+ * 6. Closes the template file.
+ * 7. Calls `htmlStaticPrint` with "logo" as the argument to print the logo.
+ *
+ * If the template file cannot be opened, an error message is printed and the function returns.
+ * If a line in the template file exceeds the maximum length, an error message is printed,
+ * the file is closed, and the function returns.
  */
 void htmlHeader(char *title) {
 	FILE *file = NULL;
@@ -106,12 +133,17 @@ void htmlHeader(char *title) {
 	htmlStaticPrint("logo");
 }
 
-/** htmlHeaderCookie
- * Prints the HTML header and sets a session cookie
- * Parameters:
- *  char *title - Page title
- *  char *cookieID - Name of the cookie
- *  char *cookieContents - value stored in the cookie
+
+/**
+ * Generates an HTML header with a cookie and a meta refresh tag.
+ *
+ * @param title The title of the HTML document.
+ * @param cookieID The ID of the cookie to be set.
+ * @param cookieContents The contents of the cookie to be set.
+ *
+ * This function prints out the HTTP headers to set a cookie and the content-type
+ * as text/html. It also generates a basic HTML structure with a meta refresh tag
+ * that redirects to the URL specified by the global variable `var_site_url`.
  */
 void htmlHeaderCookie(char *title, char *cookieID, char *cookieContents) {
 	printf("Set-Cookie: %s=%s; domain=%s; path=/; \r\n",cookieID,cookieContents,var_site_url);
@@ -122,12 +154,28 @@ void htmlHeaderCookie(char *title, char *cookieID, char *cookieContents) {
 	printf("</head><body bgcolor=\"#FFFFFF\">");
 }
 
-/** htmlReadTemplate
- * Opens a file, then reads it in line by line into a 
- *  linked list
- * Parameters:
- *  char *htmltemplate - temlpate name / file to open
- *  TEMPLATELIST **HtmlTemplate - pointer to linked list
+
+/**
+ * @brief Reads an HTML template file and stores its contents in a linked list.
+ *
+ * This function reads the contents of an HTML template file specified by the
+ * `htmltemplate` parameter and stores each line in a linked list of `TEMPLATELIST`
+ * structures. The linked list is pointed to by the `HtmlTemplate` parameter.
+ *
+ * @param htmltemplate The name of the HTML template file (without extension) to read.
+ * @param HtmlTemplate A pointer to a pointer to a `TEMPLATELIST` structure where the
+ *                     contents of the HTML template file will be stored.
+ *
+ * @note The function constructs the full path to the HTML template file using the
+ *       `var_site_location` and `var_site_templates` global variables, and appends
+ *       the ".html" extension to the `htmltemplate` parameter.
+ *
+ * @note The function allocates memory for the filename and the linked list structures.
+ *       It is the caller's responsibility to free the allocated memory.
+ *
+ * @note If the file cannot be opened, the function prints an error message and returns.
+ *       If a line in the file exceeds the maximum allowed length, the function prints
+ *       an error message, closes the file, and returns.
  */
 void htmlReadTemplate(char *htmltemplate, TEMPLATELIST **HtmlTemplate) {
 	char *first = NULL;
@@ -165,10 +213,23 @@ void htmlReadTemplate(char *htmltemplate, TEMPLATELIST **HtmlTemplate) {
 }
 
 
-/** htmlStaticPrint
- * Prints out the passed templatelist
- * Parameters: 
- *  char *htmltemplate - the html template to print
+/**
+ * @brief Prints the contents of an HTML template file to the standard output.
+ *
+ * This function constructs the full path to an HTML template file using the 
+ * provided template name and predefined directory paths. It then opens the 
+ * file, reads its contents line by line, and prints each line to the standard 
+ * output. If the file cannot be opened or a line exceeds the maximum length, 
+ * an error message is printed.
+ *
+ * @param htmltemplate The name of the HTML template file (without extension) to be printed.
+ *
+ * @note The function assumes that the global variables `var_site_location` and 
+ * `var_site_templates` are defined and contain the necessary directory paths.
+ *
+ * @warning If the file cannot be opened, a critical error message is printed.
+ * If a line exceeds the maximum length of 255 characters, an error message is 
+ * printed and the function returns immediately.
  */
 void htmlStaticPrint(char *htmltemplate) {
 	FILE *file = NULL;
@@ -200,20 +261,50 @@ void htmlStaticPrint(char *htmltemplate) {
 	fclose(file);
 }
 
-/** htmlLeftSide
- * Draws the left side (whatever boxes should be there
- * This exists so that someday it can customized by the user
+
+/**
+ * @brief Generates the left side of the HTML page.
+ *
+ * This function creates the left side of the HTML page by calling the 
+ * htmlMainBox function with the principal's groups and then prints a 
+ * static "usefulbox".
+ *
+ * @param principalName The name of the principal (not used in this function).
+ * @param principalGroups The groups associated with the principal.
  */
 void htmlLeftSide(char *principalName, char *principalGroups) {
 	htmlMainBox(principalGroups, principalGroups);
 	htmlStaticPrint("usefulbox");
 }
 
-/** htmlMainBox
- * Draws the box with all the site links
- * Parameters: 
- *  char *principalName - user name
- *  char *principalGroups - group list
+
+/**
+ * @brief Generates the main HTML box content based on user roles and templates.
+ *
+ * This function reads an HTML template file and dynamically generates HTML content
+ * based on the provided principal name and groups. It replaces specific placeholders
+ * in the template with corresponding HTML elements.
+ *
+ * @param principalName The name of the principal (user) to be used in the HTML content.
+ * @param principalGroups The groups to which the principal (user) belongs.
+ *
+ * The function performs the following steps:
+ * 1. Constructs the full path to the HTML template file.
+ * 2. Opens the HTML template file for reading.
+ * 3. Reads the template file line by line.
+ * 4. Replaces specific placeholders in the template with corresponding HTML elements
+ *    based on the principal's name and groups.
+ * 5. Outputs the generated HTML content.
+ * 6. Closes the template file.
+ *
+ * Placeholders in the template:
+ * - [% login %]: Replaced with a login link if the principal name is empty.
+ * - [% preferences %]: Replaced with a preferences link if the principal name is not empty.
+ * - [% site admin %]: Replaced with a site admin link if the principal belongs to the "admin" group.
+ * - [% newspost %]: Replaced with a post news link if the principal belongs to the "newspost" group.
+ *
+ * @note The function prints error messages to the standard output if it encounters
+ *       issues such as file open errors or line length exceeding the buffer size.
  */
 void htmlMainBox(char *principalName, char *principalGroups) {
 	FILE *file = NULL;
@@ -257,10 +348,18 @@ void htmlMainBox(char *principalName, char *principalGroups) {
 	fclose(file);
 }
 
-/** htmlDBError
- * Prints out the error message for a DB error
- * Parameters:
- *  int err - Error code
+
+/**
+ * @brief Handles database errors by printing an error message and exiting the program.
+ *
+ * This function prints an HTML-formatted error message indicating that a database error
+ * has occurred. It includes a mailto link to contact the administrator with the error code.
+ * After printing the message, it frees the memory allocated for the principal name, prints
+ * a static footer, and exits the program with a failure status.
+ *
+ * @param principalName A pointer to a string containing the principal name. This memory
+ *                      will be freed by the function.
+ * @param err An integer representing the error code to be displayed in the error message.
  */
 void htmlDBError(char *principalName, int err)
 {
@@ -272,15 +371,23 @@ void htmlDBError(char *principalName, int err)
 		exit(EXIT_FAILURE);
 }	
 
-
-/** printconv
- * Converts string to be printed into "HTML safe" string.
- * It does this by stripping out all html except for <b>, 
- *  </b>, <i>, </i>, <br>, <a>, and </a> tags. Also converts
- *  all strings beginning with "http://" or "https://"
- *  into links.
- * Parameters:
- *  char *s - string to convert and print
+/**
+ * @brief Converts and prints a given string with HTML-safe characters and tags.
+ *
+ * This function processes the input string `s` and converts certain characters and sequences 
+ * into their HTML-safe equivalents. It handles HTML tags such as <b>, <i>, <a>, and <br>, 
+ * and converts special characters like double quotes, single quotes, and ampersands into 
+ * their corresponding HTML entities.
+ *
+ * @param s The input string to be converted and printed.
+ *
+ * The function performs the following conversions:
+ * - Converts <b>, <i>, <a>, and <br> tags to their HTML-safe equivalents.
+ * - Converts URLs starting with "http" or "https" into HTML anchor tags.
+ * - Converts double quotes (") to &#34;.
+ * - Converts single quotes (') to &#39;.
+ * - Converts ampersands (&) to &amp;.
+ * - Converts carriage return and line feed (CRLF) sequences to <BR />.
  */
 void printconv(char *s) {
 	int len = strlen(s);
@@ -361,6 +468,24 @@ void printconv(char *s) {
 	}
 }
 
+/**
+ * @brief Converts and prints a given string with special handling for HTML tags and URLs.
+ *
+ * This function processes the input string `s` and prints it with special handling for:
+ * - HTML tags such as `<a href>`, `<br>`, and `</a>`.
+ * - URLs starting with "http" or "https".
+ * - Special characters like double quotes (`"`), single quotes (`'`), and ampersands (`&`).
+ * - Newline characters (`\r\n`).
+ *
+ * The function ensures that:
+ * - `<a href>` tags are wrapped with `<![CDATA[ ... ]]>`.
+ * - `<br>` tags are converted to `<br />`.
+ * - URLs are converted to clickable links.
+ * - Special characters are converted to their corresponding HTML entities.
+ * - Newline characters are converted to `<BR />`.
+ *
+ * @param s The input string to be processed and printed.
+ */
 void printconvrss(char *s) {
 	int len = strlen(s);
 	int i, j, begin, end, spaces = 0;

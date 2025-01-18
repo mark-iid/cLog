@@ -49,6 +49,29 @@ char *var_rss_show_description;
 char *var_site_create_user;
 struct field_rec *urldec;
 
+/**
+ * @file commentpostcgi.c
+ * @brief CGI script for posting comments on news items.
+ *
+ * This script handles the posting of comments on news items. It performs
+ * various checks to ensure the user is authorized to post comments and
+ * generates the HTML form for comment submission.
+ *
+ * @details
+ * The script performs the following steps:
+ * 1. Initializes the database connection.
+ * 2. Retrieves the username and groups of the principal user.
+ * 3. Checks if the user is authorized to post comments.
+ * 4. Decodes the HTTP GET parameters to retrieve the news ID (nid) and parent ID (pid).
+ * 5. Displays the parent news item if the parent ID is 0.
+ * 6. Generates the HTML form for comment submission.
+ * 7. If the comment is a response to another comment, it retrieves the parent comment details.
+ * 8. Sets the appropriate visibility (public or internal) for the comment based on the parent comment and user authorization.
+ * 9. Displays the allowed HTML tags for comments.
+ * 10. Frees allocated memory and exits.
+ *
+ * @return Returns 0 on success, or 1 on failure.
+ */
 int main () {
 	int returncode = 0;
 	MYSQL_ROW commentrow;
@@ -112,7 +135,7 @@ int main () {
             exit(EXIT_FAILURE);
         }
 		strncpy(re,commentrow[6],3);
-		re[3] = 0;
+		re[2] = 0;
 		if(strcmp(re,"re:") == 0 || strcmp(re,"Re:") == 0 || strcmp(re,"RE:") == 0) {
 			printf("<p>Title: <input name=\"title\" type=text size=50 maxlength=100 value=\"%s\">",commentrow[6]);
 		} else {

@@ -44,6 +44,33 @@ char *var_rss_show_description;
 char *var_site_create_user;
 struct field_rec *urldec;
 
+/**
+ * @file cpostcgi.c
+ * @brief CGI script for handling comment posts.
+ *
+ * This script processes HTTP POST requests to submit comments. It reads the 
+ * input data, validates the user, decodes the input, and either displays a 
+ * preview of the comment or inserts it into the database.
+ *
+ * @details
+ * The script performs the following steps:
+ * - Initializes logging and database connection.
+ * - Reads and parses the HTTP POST data.
+ * - Validates the user and their permissions.
+ * - Decodes the URL-encoded input data.
+ * - If the "Preview Comment" button was pressed, displays a preview form.
+ * - If the "Post Comment" button was pressed, inserts the comment into the database.
+ * - Frees allocated memory and prints the footer.
+ *
+ * @return Returns 0 on successful execution.
+ *
+ * @note This script requires the MySQL database and appropriate tables to be set up.
+ * @note The script assumes the presence of several helper functions and structures 
+ *       such as `cLogInitDB`, `htmlHeader`, `cLogGetUsername`, `cLogGetGroups`, 
+ *       `cLogQueryUserDB`, `htmlLeftSide`, `htmlStaticPrint`, `urlDecode`, 
+ *       `htmlReadTemplate`, `printconv`, `escConv`, `cLogQueryCommentDB`, 
+ *       and `htmlDBError`.
+ */
 int main () {
 	int returncode = 0;
 	int i; /* generic counter */

@@ -49,6 +49,26 @@ char *var_site_description;
 char *var_rss_show_description;
 char *var_site_create_user;
 
+/**
+ * @file newscgi.c
+ * @brief CGI program for displaying news items and comments.
+ *
+ * This program handles the CGI requests for displaying news items and their associated comments.
+ * It retrieves the necessary information from the environment variables and database, and generates
+ * the appropriate HTML output.
+ *
+ * @details
+ * The program performs the following steps:
+ * 1. Initializes the logging database.
+ * 2. Retrieves the username from the environment.
+ * 3. Checks if user creation is disabled and if the remote user is set, then redirects to the login URL.
+ * 4. Checks for database lookup failures for username and groups.
+ * 5. Parses the query string to retrieve the news item ID (nid).
+ * 6. Generates the HTML header and displays the news item and comments.
+ * 7. Frees allocated memory and prints the footer.
+ *
+ * @return Returns 0 on successful execution, or exits with an error code on failure.
+ */
 int main () {
 	int returncode = 0;
 	int i;
