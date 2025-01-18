@@ -1,7 +1,7 @@
 # cLog
 
 cLog (or SlashET) is a simple web-based logging system written in C. It allows users to post news, comments, and manage user preferences. The project uses MySQL for database management and is built using GNU Autotools.
-This was written effectivly on a dare to build a basic SlashDot (or Reddit if you prefer, it didn't exist then) entierly in C, using only a standard libraries and a database library. I wouldn't trust it to be stable, secure, or frankly relevent in this decade. It is very much a product of the late 90s. 
+This was written effectively on a dare to build a basic SlashDot (or Reddit if you prefer, it didn't exist then) clone entirely in C, using only standard libraries and a database library. I wouldn't trust it to be stable, secure, or frankly relevant in this decade. It is very much a product of the late 90s. 
 
 ## Features
 
