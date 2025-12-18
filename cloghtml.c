@@ -56,19 +56,27 @@ void htmlMainBox(char *principalName, char *principalGroups);
  */
 int htmlGetLine(FILE *file, char *buffer) {
 	int i = 0;
-	if(file == (FILE *)0) return 10;
-	for(i = 0;i < 255;i++) {
-		buffer[i] = getc(file);
-		if(buffer[i] == '\r' || buffer[i] == '\n') {
-			buffer[++i] = '\0';
-			return 0;
-		}
-		if(buffer[i] == EOF) {
+	int c;
+	if (file == NULL) return 10;
+	/* leave room for terminating NUL in 512-byte buffer */
+	while (i < 511) {
+		c = getc(file);
+		if (c == EOF) {
+			if (i == 0) {
+				buffer[0] = '\0';
+				return 1; /* EOF / no data */
+			}
 			buffer[i] = '\0';
-			return 1;
+			return 1; /* EOF after data */
 		}
+		if (c == '\r' || c == '\n') {
+			buffer[i] = '\0';
+			return 0; /* line read */
+		}
+		buffer[i++] = (char)c;
 	}
-	buffer[++i] = '\0';
+	/* buffer full */
+	buffer[511] = '\0';
 	return 2; /* buffer length exceeded */
 }
 
@@ -99,7 +107,7 @@ int htmlGetLine(FILE *file, char *buffer) {
  */
 void htmlHeader(char *title) {
 	FILE *file = NULL;
-	char buffer[256];
+	char buffer[512];
 	char *templatefile;
 	char *htmltemplate = "header.html";
 	int x = 0;
@@ -110,7 +118,6 @@ void htmlHeader(char *title) {
 
 	templatefile = malloc((strlen(var_site_location) + strlen(var_site_templates)+strlen(htmltemplate) +1));
 	sprintf(templatefile,"%s%s%s",var_site_location,var_site_templates,htmltemplate);
-	
 	
 	file = fopen(templatefile, "r");
 	if(templatefile != NULL) free(templatefile);	
@@ -188,7 +195,7 @@ void htmlReadTemplate(char *htmltemplate, TEMPLATELIST **HtmlTemplate) {
 	sprintf(filename,"%s%s%s%s",var_site_location,var_site_templates,htmltemplate,ext);
 	
 	file = fopen(filename, "r");
-	if(filename != NULL) free(filename);
+	//if(filename != NULL) free(filename);
 	if(file == (FILE *)0) {
 		printf("Critical File Open error: %s",filename);
 		return;
@@ -233,7 +240,7 @@ void htmlReadTemplate(char *htmltemplate, TEMPLATELIST **HtmlTemplate) {
  */
 void htmlStaticPrint(char *htmltemplate) {
 	FILE *file = NULL;
-	char buffer[256];
+	char buffer[512];
 	char *filename;
 	char *ext = ".html";
 
@@ -248,7 +255,7 @@ void htmlStaticPrint(char *htmltemplate) {
 		if(filename != NULL) free(filename);  
 		return;
 	}
-	if(filename != NULL) free(filename);  
+	//if(filename != NULL) free(filename);  
 	do {
 		x = htmlGetLine(file, buffer);
 		if(x > 1) { 
@@ -308,7 +315,7 @@ void htmlLeftSide(char *principalName, char *principalGroups) {
  */
 void htmlMainBox(char *principalName, char *principalGroups) {
 	FILE *file = NULL;
-	char buffer[256];
+	char buffer[512];
 	char *filename;
 	char *htmltemplate = "mainbox.html";
 	int x = 0;

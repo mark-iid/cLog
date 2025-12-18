@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 typedef struct templatelist {
-	char data[256];
+	char data[512];
 	struct templatelist *next;
 } TEMPLATELIST;
 
